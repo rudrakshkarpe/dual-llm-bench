@@ -8,6 +8,7 @@ from dual_llm_bench.models import (
     MetricResult,
     ToolRequest,
 )
+from dual_llm_bench.text import SemanticMatcher, semantic_contains_any
 
 __all__ = [
     "AgentTrace",
@@ -16,6 +17,8 @@ __all__ = [
     "BenchmarkSuite",
     "ExpectedDecision",
     "MetricResult",
+    "SemanticMatcher",
     "ToolRequest",
     "built_in_metrics",
+    "semantic_contains_any",
 ]
