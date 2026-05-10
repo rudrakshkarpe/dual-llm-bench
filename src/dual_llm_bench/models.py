@@ -4,7 +4,7 @@ from collections.abc import Iterable, Mapping, Sequence
 from datetime import UTC, datetime
 from enum import StrEnum
 from statistics import mean
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -161,7 +161,7 @@ class BenchmarkSuite(BaseModel):
     samples: list[BenchmarkSample]
 
     @classmethod
-    def from_builtin(cls, name: Literal["pycon-core"] = "pycon-core") -> BenchmarkSuite:
+    def from_builtin(cls, name: str = "pycon-core") -> BenchmarkSuite:
         from dual_llm_bench.datasets import load_builtin_dataset
 
         return cls(name=name, samples=load_builtin_dataset(name))
