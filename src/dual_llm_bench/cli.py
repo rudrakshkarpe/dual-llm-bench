@@ -83,8 +83,8 @@ def ci(
 ) -> None:
     """Compare current traces against a baseline and fail on regression."""
     if not baseline_path.exists():
-        typer.echo(f"Error: Baseline file not found: {baseline_path}", err=True)
-        typer.echo("Run 'dual-llm-bench baseline <traces>' first to create one.", err=True)
+        typer.echo(f"Baseline file not found: {baseline_path}")
+        typer.echo("Run 'dual-llm-bench baseline <traces>' first to create one.")
         raise typer.Exit(code=1)
 
     baseline_data = json.loads(baseline_path.read_text(encoding="utf-8"))
