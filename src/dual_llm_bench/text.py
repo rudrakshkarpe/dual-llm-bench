@@ -52,9 +52,9 @@ class SemanticMatcher:
     def available(self) -> bool:
         if self._available is None:
             try:
-                from sentence_transformers import SentenceTransformer
+                import sentence_transformers as _st  # type: ignore[import-not-found]
 
-                self._model = SentenceTransformer(self._model_name)
+                self._model = _st.SentenceTransformer(self._model_name)
                 self._available = True
             except ImportError:
                 self._available = False
