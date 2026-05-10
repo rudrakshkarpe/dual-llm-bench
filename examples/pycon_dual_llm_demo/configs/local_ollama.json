@@ -1,0 +1,10 @@
+{
+  "provider": "ollama",
+  "backend_name": "ollama",
+  "run_mode": "ollama",
+  "base_url": "http://127.0.0.1:11434",
+  "main_model": "llama3.2:latest",
+  "reviewer_model": "gemma3:latest",
+  "timeout_seconds": 240,
+  "output_prefix": "example-ollama"
+}

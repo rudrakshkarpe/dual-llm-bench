@@ -1,0 +1,11 @@
+{
+  "provider": "openrouter",
+  "backend_name": "openrouter",
+  "run_mode": "live",
+  "base_url": "https://openrouter.ai/api/v1",
+  "api_key_env": "OPENROUTER_API_KEY",
+  "main_model": "anthropic/claude-sonnet-4.5",
+  "reviewer_model": "anthropic/claude-3.5-haiku",
+  "timeout_seconds": 300,
+  "output_prefix": "example-openrouter-claude"
+}
