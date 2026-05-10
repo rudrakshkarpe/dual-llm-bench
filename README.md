@@ -1,4 +1,4 @@
-# dual-llm-bench
+# [dual-llm-bench](https://pypi.org/project/dual-llm-bench/)
 
 `dual-llm-bench` is a small benchmarking package for measuring prompt-injection resilience, privileged-context exposure, tool-safety behavior, and useful-task retention in agentic LLM systems.
 
