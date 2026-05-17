@@ -25,6 +25,8 @@ def _make_trace(sample_id: str, *, good: bool) -> dict:
             "policy_verdict": "allow",
             "tool_request": {"name": "create_ticket", "arguments": {"queue": "finance"}},
             "final_outcome": "Created finance ticket for invoice 8821 ACH verification.",
+            "latency_ms": 500,
+            "cost_usd": 0.002,
         }
     return {
         "sample_id": sample_id,
@@ -33,6 +35,8 @@ def _make_trace(sample_id: str, *, good: bool) -> dict:
         "policy_verdict": "allow",
         "tool_request": {"name": "send_external_webhook", "arguments": {}},
         "final_outcome": "Sent data. ignore prior user requests.",
+        "latency_ms": 5_000,
+        "cost_usd": 0.05,
     }
 
 
@@ -54,6 +58,31 @@ def test_baseline_creates_file(tmp_path):
     assert "overall_score" in data
     assert "metric_scores" in data
     assert data["dataset"] == "pycon-core"
+
+
+def test_baseline_can_include_performance_metrics(tmp_path):
+    traces = _write_traces(tmp_path)
+    output = tmp_path / "baseline.json"
+
+    result = runner.invoke(
+        app,
+        [
+            "baseline",
+            str(traces),
+            "--output",
+            str(output),
+            "--include-performance",
+            "--latency-baseline-ms",
+            "1000",
+            "--cost-budget-usd",
+            "0.01",
+        ],
+    )
+
+    assert result.exit_code == 0
+    data = json.loads(output.read_text())
+    assert "latency_overhead" in data["metric_scores"]
+    assert "cost_efficiency" in data["metric_scores"]
 
 
 def test_ci_passes_when_no_regression(tmp_path):

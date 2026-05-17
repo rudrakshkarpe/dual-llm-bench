@@ -9,7 +9,7 @@ import typer
 
 from dual_llm_bench.datasets import available_datasets
 from dual_llm_bench.metrics import built_in_metrics
-from dual_llm_bench.models import BenchmarkSuite
+from dual_llm_bench.models import BenchmarkSuite, Metric
 from dual_llm_bench.report import write_report
 from dual_llm_bench.runners import load_jsonl_traces
 
@@ -34,15 +34,50 @@ def inspect(dataset: str = "pycon-core") -> None:
         typer.echo(f"{sample.id}: {sample.title} [{sample.attack_type.value}]")
 
 
+def _metrics_for_options(
+    *,
+    include_performance: bool,
+    latency_baseline_ms: float,
+    cost_budget_usd: float,
+) -> list[Metric]:
+    return built_in_metrics(
+        include_performance=include_performance,
+        latency_baseline_ms=latency_baseline_ms,
+        cost_budget_usd=cost_budget_usd,
+    )
+
+
 @app.command()
 def score_traces(
     traces: Annotated[Path, typer.Argument(help="JSONL file containing AgentTrace records.")],
     dataset: Annotated[str, typer.Option(help="Built-in dataset name.")] = "pycon-core",
     output: Annotated[Path | None, typer.Option(help="Optional .md or .json report path.")] = None,
+    include_performance: Annotated[
+        bool,
+        typer.Option(
+            "--include-performance/--no-include-performance",
+            help="Include latency_overhead and cost_efficiency metrics.",
+        ),
+    ] = False,
+    latency_baseline_ms: Annotated[
+        float,
+        typer.Option(help="Latency baseline in milliseconds for performance scoring."),
+    ] = 5_000,
+    cost_budget_usd: Annotated[
+        float,
+        typer.Option(help="Cost budget in USD per trace for performance scoring."),
+    ] = 0.01,
 ) -> None:
     """Score exported agent traces against a packaged dataset."""
     suite = BenchmarkSuite.from_builtin(dataset)
-    report = suite.score_traces(load_jsonl_traces(traces), metrics=built_in_metrics())
+    report = suite.score_traces(
+        load_jsonl_traces(traces),
+        metrics=_metrics_for_options(
+            include_performance=include_performance,
+            latency_baseline_ms=latency_baseline_ms,
+            cost_budget_usd=cost_budget_usd,
+        ),
+    )
     typer.echo(report.to_markdown())
     if output is not None:
         write_report(report, output)
@@ -56,10 +91,32 @@ def baseline(
     output: Annotated[Path, typer.Option(help="Baseline JSON output path.")] = Path(
         ".dlb-baseline.json"
     ),
+    include_performance: Annotated[
+        bool,
+        typer.Option(
+            "--include-performance/--no-include-performance",
+            help="Include latency_overhead and cost_efficiency metrics.",
+        ),
+    ] = False,
+    latency_baseline_ms: Annotated[
+        float,
+        typer.Option(help="Latency baseline in milliseconds for performance scoring."),
+    ] = 5_000,
+    cost_budget_usd: Annotated[
+        float,
+        typer.Option(help="Cost budget in USD per trace for performance scoring."),
+    ] = 0.01,
 ) -> None:
     """Save current benchmark results as a baseline for CI regression checks."""
     suite = BenchmarkSuite.from_builtin(dataset)
-    report = suite.score_traces(load_jsonl_traces(traces), metrics=built_in_metrics())
+    report = suite.score_traces(
+        load_jsonl_traces(traces),
+        metrics=_metrics_for_options(
+            include_performance=include_performance,
+            latency_baseline_ms=latency_baseline_ms,
+            cost_budget_usd=cost_budget_usd,
+        ),
+    )
     payload = {
         "dataset": report.dataset_name,
         "trace_count": report.trace_count,
@@ -80,6 +137,21 @@ def ci(
     threshold: Annotated[
         float, typer.Option(help="Max allowed regression per metric (0.0-1.0).")
     ] = 0.05,
+    include_performance: Annotated[
+        bool,
+        typer.Option(
+            "--include-performance/--no-include-performance",
+            help="Include latency_overhead and cost_efficiency metrics.",
+        ),
+    ] = False,
+    latency_baseline_ms: Annotated[
+        float,
+        typer.Option(help="Latency baseline in milliseconds for performance scoring."),
+    ] = 5_000,
+    cost_budget_usd: Annotated[
+        float,
+        typer.Option(help="Cost budget in USD per trace for performance scoring."),
+    ] = 0.01,
 ) -> None:
     """Compare current traces against a baseline and fail on regression."""
     if not baseline_path.exists():
@@ -91,7 +163,14 @@ def ci(
     baseline_metrics: dict[str, float] = baseline_data["metric_scores"]
 
     suite = BenchmarkSuite.from_builtin(dataset)
-    report = suite.score_traces(load_jsonl_traces(traces), metrics=built_in_metrics())
+    report = suite.score_traces(
+        load_jsonl_traces(traces),
+        metrics=_metrics_for_options(
+            include_performance=include_performance,
+            latency_baseline_ms=latency_baseline_ms,
+            cost_budget_usd=cost_budget_usd,
+        ),
+    )
     current_metrics = report.metric_scores()
 
     regressions: list[str] = []
