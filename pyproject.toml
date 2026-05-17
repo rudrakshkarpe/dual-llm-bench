@@ -49,6 +49,9 @@ dev = [
   "build>=1.2,<2",
   "twine>=5,<7",
 ]
+codspeed = [
+  "pytest-codspeed>=5,<6",
+]
 
 [project.scripts]
 dual-llm-bench = "dual_llm_bench.cli:app"
@@ -63,6 +66,7 @@ packages = ["src/dual_llm_bench"]
 [tool.hatch.build.targets.sdist]
 include = [
   "/src",
+  "/benchmarks",
   "/tests",
   "/docs",
   "/examples",
