@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 from dual_llm_bench.models import BenchmarkReport
 
 
-def _report_payload(report: BenchmarkReport) -> dict:
+def _report_payload(report: BenchmarkReport) -> dict[str, Any]:
     return {
         "summary": {
             "dataset": report.dataset_name,
