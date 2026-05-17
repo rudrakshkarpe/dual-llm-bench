@@ -17,6 +17,13 @@ pip install -e ".[dev]"
 pytest
 ```
 
+For performance benchmarks tracked by CodSpeed:
+
+```bash
+pip install -e ".[codspeed]"
+pytest benchmarks/ --codspeed
+```
+
 ## Quick Start
 
 ```python
