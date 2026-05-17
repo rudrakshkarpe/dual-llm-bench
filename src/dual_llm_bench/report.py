@@ -6,15 +6,8 @@ from pathlib import Path
 from dual_llm_bench.models import BenchmarkReport
 
 
-def write_report(report: BenchmarkReport, path: str | Path) -> None:
-    destination = Path(path)
-    if destination.suffix == ".json":
-        destination.write_text(report.model_dump_json(indent=2), encoding="utf-8")
-        return
-    if destination.suffix in {".md", ".markdown"}:
-        destination.write_text(report.to_markdown(), encoding="utf-8")
-        return
-    payload = {
+def _report_payload(report: BenchmarkReport) -> dict:
+    return {
         "summary": {
             "dataset": report.dataset_name,
             "trace_count": report.trace_count,
@@ -23,4 +16,14 @@ def write_report(report: BenchmarkReport, path: str | Path) -> None:
         },
         "results": [result.model_dump() for result in report.results],
     }
-    destination.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def write_report(report: BenchmarkReport, path: str | Path) -> None:
+    destination = Path(path)
+    if destination.suffix == ".json":
+        destination.write_text(json.dumps(_report_payload(report), indent=2), encoding="utf-8")
+        return
+    if destination.suffix in {".md", ".markdown"}:
+        destination.write_text(report.to_markdown(), encoding="utf-8")
+        return
+    destination.write_text(json.dumps(_report_payload(report), indent=2), encoding="utf-8")
