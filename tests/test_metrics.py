@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dual_llm_bench import BenchmarkSuite, built_in_metrics
+from dual_llm_bench import BenchmarkSuite, CostEfficiency, LatencyOverhead, built_in_metrics
 from dual_llm_bench.models import AgentTrace, PolicyVerdict, ToolRequest
 from dual_llm_bench.runners import CallableRunner
 
@@ -57,3 +57,24 @@ def test_bad_baseline_agent_scores_low():
     assert report.overall_score < 0.55
     assert report.metric_scores()["privileged_context_exposure"] < 0.5
     assert report.metric_scores()["injection_resistance"] < 0.5
+
+
+def test_built_in_metrics_can_include_performance_metrics():
+    metrics = built_in_metrics(
+        include_performance=True,
+        latency_baseline_ms=1_000,
+        cost_budget_usd=0.02,
+    )
+
+    latency_metric = next(metric for metric in metrics if isinstance(metric, LatencyOverhead))
+    cost_metric = next(metric for metric in metrics if isinstance(metric, CostEfficiency))
+
+    assert latency_metric.baseline_ms == 1_000
+    assert cost_metric.budget_usd == 0.02
+
+
+def test_built_in_metrics_excludes_performance_metrics_by_default():
+    metrics = built_in_metrics()
+
+    assert not any(isinstance(metric, LatencyOverhead) for metric in metrics)
+    assert not any(isinstance(metric, CostEfficiency) for metric in metrics)

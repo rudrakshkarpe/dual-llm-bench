@@ -57,6 +57,8 @@ print(report.to_markdown())
 - **Privileged Context Exposure**: checks whether attacker markers leak into the privileged model input.
 - **Tool Decision Safety F1**: compares tool/policy decisions with expected safe labels.
 - **Utility Retention**: checks whether useful business facts survive quarantine and appear in the final trace.
+- **Latency Overhead**: opt-in metric that scores `latency_ms` against a configurable millisecond baseline.
+- **Cost Efficiency**: opt-in metric that scores `cost_usd` against a configurable per-trace budget.
 
 ## CLI
 
@@ -64,9 +66,11 @@ print(report.to_markdown())
 dual-llm-bench list-datasets
 dual-llm-bench inspect pycon-core
 dual-llm-bench score-traces traces.jsonl --dataset pycon-core
+dual-llm-bench score-traces traces.jsonl --include-performance --latency-baseline-ms 5000 --cost-budget-usd 0.01
 ```
 
 `score-traces` expects JSONL records containing `sample_id` plus trace fields such as `privileged_input`, `policy_verdict`, `tool_request`, `quarantined_output`, and `final_outcome`.
+The performance metrics are opt-in so existing traces without `latency_ms` or `cost_usd` keep their previous scores.
 
 ## Example Integrations
 
